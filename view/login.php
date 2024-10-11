@@ -115,8 +115,11 @@
                             <input type="password" class="form-control" id="signin-password" name="signin-password" required placeholder="Password">
                         </div>
 
-                        <!-- ลบการเก็บรหัสผ่านในคุกกี้ -->
-                        <!-- <input type="checkbox" id="remember" name="remember"> Remember Me -->
+                        <!-- เพิ่ม checkbox สำหรับ Remember Me -->
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">Remember Me</label>
+                        </div>
 
                         <div class="login">
                             <div class="d-grid gap-2">
@@ -155,66 +158,40 @@ $(document).ready(function() {
                 remember: remember,
                 login: 1
             }),
+            dataType: 'json', // Expect JSON response
             success: function(response) {
                 console.log(response); // Log the response for debugging
-                if (response === 'admin') {
-                    if (remember) {
-                        // ใช้โทเค็นแทนการเก็บรหัสผ่าน
-                        // ตัวอย่าง: เก็บโทเค็นที่เซิร์ฟเวอร์ได้ตั้งไว้แล้ว
-                    } else {
-                        document.cookie = "remember_me=; max-age=-1; path=/";
-                    }
+                if (response.success) {
                     Swal.fire({
                         position: 'center',
                         icon: 'success',
-                        title: 'เข้าสู่ระบบสำเร็จ!!',
+                        title: response.message,
                         showConfirmButton: false,
                         timer: 1500
-                    });
-                    setTimeout(function() {
-                        window.location.href = "admin/upload_page.php"; // Redirect to admin page
-                    }, 1500);
-                } else if (response === 'failuser') {
-                    Swal.fire({
-                        position: 'center',
-                        icon: 'error',
-                        title: 'ไม่มีบัญชีนี้ในระบบ!!',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                    $('#signin-password').val('');
-                } else if (response === 'failpass') {
-                    Swal.fire({
-                        position: 'center',
-                        icon: 'error',
-                        title: 'รหัสผ่านไม่ถูกต้อง!!',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                    $('#signin-password').val('');
-                } else if (response === 'close') {
-                    Swal.fire({
-                        position: 'center',
-                        icon: 'error',
-                        title: 'บัญชีนี้ถูกระงับการใช้งาน',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                } else if (response === 'invalid_user_type') {
-                    Swal.fire({
-                        position: 'center',
-                        icon: 'error',
-                        title: 'สิทธิ์การใช้งานไม่ถูกต้อง',
-                        showConfirmButton: false,
-                        timer: 1500
+                    }).then(() => {
+                        window.location.href = response.redirect; // Redirect based on response
                     });
                 } else {
-                    console.log('Unexpected response:', response);
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'error',
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    $('#signin-password').val('');
                 }
             },
             error: function(xhr, status, error) {
                 console.log('AJAX Error:', status, error);
                 console.log(xhr.responseText); // Log the actual response
+                Swal.fire({
+                    position: 'center',
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
             }
         });
     });

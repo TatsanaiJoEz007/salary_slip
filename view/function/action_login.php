@@ -1,92 +1,101 @@
 <?php
 header('Content-Type: application/json');
+require_once('../config/connect.php'); // ตรวจสอบเส้นทางให้ถูกต้อง
 
-// เริ่มต้น session หากยังไม่ได้เริ่ม
-if (!isset($_SESSION)) {
-    session_start();
+session_start();
+
+// รับข้อมูลจาก JSON ที่ส่งมา
+$input = json_decode(file_get_contents('php://input'), true);
+
+$response = [
+    'success' => false,
+    'message' => '',
+    'redirect' => ''
+];
+
+// ตรวจสอบว่ามีการส่งค่าที่จำเป็นหรือไม่
+if (!isset($input['login']) || $input['login'] != 1) {
+    $response['message'] = 'Invalid request.';
+    echo json_encode($response);
+    exit;
 }
 
-require_once('../config/connect.php');
+if (!isset($input['user_email']) || !isset($input['user_pass'])) {
+    $response['message'] = 'Please provide both email and password.';
+    echo json_encode($response);
+    exit;
+}
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+$user_email = trim($input['user_email']);
+$user_pass = $input['user_pass'];
+$remember = isset($input['remember']) ? $input['remember'] : false;
 
-// รับข้อมูล JSON ที่ถูกส่งมา
-$data = json_decode(file_get_contents('php://input'), true);
+// Validate email format
+if (!filter_var($user_email, FILTER_VALIDATE_EMAIL)) {
+    $response['message'] = 'Invalid email format.';
+    echo json_encode($response);
+    exit;
+}
 
-// ตรวจสอบว่ามีการส่งข้อมูล login มาหรือไม่
-if (isset($data['login'])) {
-    $user_email = $data['user_email'];
-    $user_pass = $data['user_pass']; // รับรหัสผ่านที่ยังไม่ถูกเข้ารหัส
-    $remember = isset($data['remember']) ? $data['remember'] : false;
+// Prepare SQL to fetch user by email
+$stmt = $conn->prepare("SELECT user_id, user_firstname, user_lastname, user_email, user_pass, user_status, user_type FROM tb_user WHERE user_email = ? LIMIT 1");
+if (!$stmt) {
+    $response['message'] = 'Database error: ' . $conn->error;
+    echo json_encode($response);
+    exit;
+}
 
-    // ตรวจสอบข้อมูลที่ได้รับ
-    if (empty($user_email) || empty($user_pass)) {
-        echo json_encode('invalid_input');
-        exit;
-    }
+$stmt->bind_param("s", $user_email);
+$stmt->execute();
+$stmt->store_result();
 
-    // ค้นหาผู้ใช้ในฐานข้อมูล
-    $check = "SELECT * FROM tb_user WHERE user_email = ?";
-    $check_user = $conn->prepare($check);
-    $check_user->bind_param("s", $user_email);
-    $check_user->execute();
-    $result = $check_user->get_result();
+if ($stmt->num_rows === 1) {
+    $stmt->bind_result($user_id, $user_firstname, $user_lastname, $user_email_db, $hashed_password, $user_status, $user_type);
+    $stmt->fetch();
 
-    // ตรวจสอบว่าพบผู้ใช้หรือไม่
-    if ($result->num_rows >= 1) {
-        $user = $result->fetch_array();
+    // ตรวจสอบรหัสผ่าน
+    if (password_verify($user_pass, $hashed_password)) {
+        if ($user_status != 1) {
+            $response['message'] = 'บัญชีนี้ถูกระงับการใช้งาน.';
+            echo json_encode($response);
+            exit;
+        }
 
-        // ตรวจสอบรหัสผ่านด้วย password_verify
-        if (password_verify($user_pass, $user['user_pass'])) {
-            if ($user['user_status'] != 0) {
-                // ตั้งค่า session
-                $_SESSION['login'] = true;
-                $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['employee_id'] = $user['employee_id'];  // Update for employee_id
-                $_SESSION['user_firstname'] = $user['user_firstname'];
-                $_SESSION['user_lastname'] = $user['user_lastname'];
-                $_SESSION['user_email'] = $user['user_email'];
-                $_SESSION['user_create_at'] = $user['user_create_at'];
+        // ตั้งค่าตัวแปรเซสชัน
+        $_SESSION['login'] = true;
+        $_SESSION['user_id'] = $user_id;
+        $_SESSION['user_firstname'] = $user_firstname;
+        $_SESSION['user_lastname'] = $user_lastname;
+        $_SESSION['user_email'] = $user_email_db;
+        $_SESSION['user_type'] = $user_type;
 
-                $user_type = $user['user_type'];
-
-                // จัดการ "Remember Me" ด้วยการใช้โทเค็นแทนการเก็บรหัสผ่าน
-                if ($remember) {
-                    // สร้างโทเค็นแบบสุ่ม
-                    $token = bin2hex(random_bytes(16));
-                    $expires_at = date('Y-m-d H:i:s', time() + (86400 * 30)); // 30 วัน
-
-                    // เก็บโทเค็นในฐานข้อมูล
-                    $insert_token = "INSERT INTO tb_remember_me (user_id, token, expires_at) VALUES (?, ?, ?)";
-                    $stmt = $conn->prepare($insert_token);
-                    $stmt->bind_param("iss", $user['user_id'], $token, $expires_at);
-                    $stmt->execute();
-
-                    // ตั้งค่าโคเคชสำหรับโทเค็น
-                    setcookie('remember_me', $token, time() + (86400 * 30), "/"); // 30 วัน
-                } else {
-                    setcookie('remember_me', '', time() - 3600, "/");
-                }
-
-                // ส่งคืนประเภทผู้ใช้ (เฉพาะ admin)
-                if ($user_type == 999) {
-                    $_SESSION['user_type'] = 'admin';
-                    echo json_encode('admin');
-                } else {
-                    echo json_encode('invalid_user_type');
-                }
-            } else {
-                echo json_encode('close');
-            }
+        // ถ้า Remember Me ถูกเลือก ให้ตั้งค่า Cookie (ตัวอย่าง: 30 วัน)
+        if ($remember) {
+            setcookie('username', $user_email, time() + (86400 * 30), "/"); // 86400 = 1 day
         } else {
-            echo json_encode('failpass');
+            setcookie('username', '', time() - 3600, "/"); // ลบ cookie
+        }
+
+        // กำหนดเส้นทางการเปลี่ยนเส้นทางตามประเภทผู้ใช้
+        if ($user_type == 999) { // admin
+            $response['redirect'] = 'admin/upload_page.php';
+            $response['success'] = true;
+            $response['message'] = 'เข้าสู่ระบบสำเร็จ!!';
+        } else {
+            // ถ้าคุณมีประเภทผู้ใช้อื่น ๆ ให้กำหนดเส้นทางที่เหมาะสม
+            $response['message'] = 'สิทธิ์การใช้งานไม่ถูกต้อง';
         }
     } else {
-        echo json_encode('failuser');
+        // รหัสผ่านไม่ถูกต้อง
+        $response['message'] = 'รหัสผ่านไม่ถูกต้อง!!';
     }
 } else {
-    error_log("Login key not detected");
-    echo json_encode('no_post');
+    // ไม่พบผู้ใช้
+    $response['message'] = 'ไม่มีบัญชีนี้ในระบบ!!';
 }
+
+$stmt->close();
+$conn->close();
+
+echo json_encode($response);
 ?>
