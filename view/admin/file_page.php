@@ -1,3 +1,22 @@
+<?php
+    require_once('../config/connect.php');
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    // ดึงข้อมูลไฟล์ PDF ทั้งหมดจากฐานข้อมูล
+    $pdfFiles = [];
+    $sql = "SELECT pdf_id, pdf_name, uploaded_at FROM tb_pdf_files";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $pdfFiles[] = $row;
+        }
+    }
+?>
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -176,67 +195,39 @@
         </div>
     </div>
     <div class="content" id="content">
-        <hr class="container">
-        <div class="container">
-            <div class="row g-4 settings-section">
-                <div class="col-12 col-md-12">
-                    <h5 class="app-page-title">ตารางไฟล์ Excel</h5>
-                    <div class="app-card app-card-settings shadow-sm p-4">
-                        <div class="app-card-body">
-                            <!-- ส่วนแสดงไฟล์ในรูปแบบ card -->
-                            <div class="file-card">
-                                <div>
-                                    <div class="file-card-title">ชื่อไฟล์: example.xlsx</div>
-                                    <div class="file-card-time">เวลาอัปโหลด: 2024-10-4 14:30</div>
+    <div class="container">
+        <div class="row g-4 settings-section">
+            <div class="col-12 col-md-12">
+                <h5 class="app-page-title">ตารางไฟล์ PDF</h5>
+                <div class="app-card app-card-settings shadow-sm p-4">
+                    <div class="app-card-body">
+                        <!-- ส่วนแสดงไฟล์ในรูปแบบ card -->
+                        <?php if (!empty($pdfFiles)): ?>
+                            <?php foreach ($pdfFiles as $file): ?>
+                                <div class="file-card">
+                                    <div>
+                                        <div class="file-card-title">ชื่อไฟล์: <?= htmlspecialchars($file['pdf_name']) ?></div>
+                                        <div class="file-card-time">เวลาอัปโหลด: <?= $file['uploaded_at'] ?></div>
+                                    </div>
+                                    <div class="file-card-actions">
+                                        <a href="function/download_pdf.php?id=<?= $file['pdf_id'] ?>" class="btn btn-primary btn-sm">ดาวน์โหลดไฟล์</a>
+                                        <button class="btn btn-danger btn-sm" onclick="deletePDF(<?= $file['pdf_id'] ?>)">ลบไฟล์</button>
+                                    </div>
                                 </div>
-                                <div class="file-card-actions">
-                                    <button class="btn btn-danger btn-sm">ลบไฟล์</button>
-                                    <button class="btn btn-primary btn-sm">ดาวน์โหลดไฟล์</button>
-                                </div>
-                            </div>
-
-                            <!-- ส่วนแสดงไฟล์ที่เพิ่มเข้ามาอีก (สามารถเพิ่มจากฐานข้อมูลได้ในอนาคต) -->
-                            <div class="file-card">
-                                <div>
-                                    <div class="file-card-title">ชื่อไฟล์: data.xlsx</div>
-                                    <div class="file-card-time">เวลาอัปโหลด: 2024-10-03 10:45</div>
-                                </div>
-                                <div class="file-card-actions">
-                                    <button class="btn btn-danger btn-sm">ลบไฟล์</button>
-                                    <button class="btn btn-primary btn-sm">ดาวน์โหลดไฟล์</button>
-                                </div>
-                            </div>
-
-                            <!-- เพิ่ม card ตามต้องการในนี้ -->
-                            <div class="file-card">
-                                <div>
-                                    <div class="file-card-title">ชื่อไฟล์: data.xlsx</div>
-                                    <div class="file-card-time">เวลาอัปโหลด: 2024-10-02 16:45</div>
-                                </div>
-                                <div class="file-card-actions">
-                                    <button class="btn btn-danger btn-sm">ลบไฟล์</button>
-                                    <button class="btn btn-primary btn-sm">ดาวน์โหลดไฟล์</button>
-                                </div>
-                            </div>
-
-                            <!-- เพิ่ม card ตามต้องการในนี้ -->
-                            <div class="file-card">
-                                <div>
-                                    <div class="file-card-title">ชื่อไฟล์: data.xlsx</div>
-                                    <div class="file-card-time">เวลาอัปโหลด: 2024-10-01 11:25</div>
-                                </div>
-                                <div class="file-card-actions">
-                                    <button class="btn btn-danger btn-sm">ลบไฟล์</button>
-                                    <button class="btn btn-primary btn-sm">ดาวน์โหลดไฟล์</button>
-                                </div>
-                            </div>
-
-                        </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p>ไม่มีไฟล์ PDF ที่อัปโหลด</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    </div>
+
+
+
+                            
 
     <script src="https://fastly.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -6,13 +6,19 @@
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
+
+    if (isset($_SESSION['user'])) {
+        $username = $_SESSION['user']['username'];
+    } else {
+        $username = 'Guest'; // หรือค่าที่คุณต้องการแสดงเมื่อไม่พบข้อมูล
+    }
 ?>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload sss</title>
+    <title>Upload PDF</title>
     <!-- Add SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <!-- Add Bootstrap CSS for responsiveness -->
@@ -214,54 +220,21 @@
     </div>
     <div class="sidebar" id="sidebar">
         <h2>Salary Slip System</h2>
-        <a href="upload_page.php">อัปโหลดไฟล์ Excel</a>
-        <a href="file_page.php">ไฟล์ Excel</a>
+        <a href="upload_page.php">อัปโหลดไฟล์ PDF</a>
+        <a href="file_page.php">ไฟล์ PDF</a>
         <a href="admin_system.php">ตารางข้อมูลผู้ดูแลระบบ</a>
         <div class="user-info">
-            <button class="logout-btn" onclick="logout()">ชื่อผู้ใช้: ดึงจาก session ที่ login เข้ามา <i class="fas fa-sign-out-alt"></i></button>
+            <p>ชื่อผู้ใช้: <?php echo htmlspecialchars($username); ?></p>
+            <button class="logout-btn" onclick="logout()">ออกจากระบบ <i class="fas fa-sign-out-alt"></i></button>
         </div>
     </div>
-    <div class="content" id="content">
-        <div class="container">
-            <h1 class="heading">Upload Excel (.xlsx)</h1>
-            <div class="instruction-box">
-                <h2>วิธีการใช้งาน</h2>
-                <ol>
-                    <li>กด <b>Choose Excel File</b> เพื่อเลือกไฟล์ Excel ที่ต้องการอัปโหลด</li>
-                    <li>กด <b>Import to Database</b> เพื่ออัปโหลดข้อมูลเข้าสู่ฐานข้อมูล</li>
-                </ol>
-            </div>
-            <div class="section">
-                <h3 class="sub-heading">Upload your Excel File</h3>
-                <div class="buttons">
-                    <form action="function/upload_xlsx.php" method="post" enctype="multipart/form-data">
-                        <label for="xlsxFileInput" class="btn-custom btn-upload">
-                            <i class="fas fa-file-upload"></i>
-                            <span id="fileInputText">&nbsp;Choose Excel File</span>
-                            <input type="file" id="xlsxFileInput" name="xlsxFile" class="file-input" accept=".xlsx">
-                        </label>
-                        <button type="submit" class="btn-custom" id="importButton" disabled>
-                            <i class="fas fa-database"></i>
-                            <span>&nbsp;Import to Database</span>
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Display file name and icon -->
-                <div class="file-info" id="fileInfo">
-                    <!-- This will be populated by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="content" id="content">
         <div class="container">
             <h1 class="heading">Upload PDF (.pdf)</h1>
             <div class="instruction-box">
                 <h2>วิธีการใช้งาน</h2>
                 <ol>
-                    <li>กด <b>Choose Excel File</b> เพื่อเลือกไฟล์ Excel ที่ต้องการอัปโหลด</li>
+                    <li>กด <b>Choose PDF File</b> เพื่อเลือกไฟล์ PDF ที่ต้องการอัปโหลด</li>
                     <li>กด <b>Import to Database</b> เพื่ออัปโหลดข้อมูลเข้าสู่ฐานข้อมูล</li>
                 </ol>
             </div>
@@ -269,30 +242,22 @@
                 <h3 class="sub-heading">Upload your PDF File</h3>
                 <div class="buttons">
                     <form action="function/upload_pdf.php" method="post" enctype="multipart/form-data">
-                        <label for="xlsxFileInput" class="btn-custom btn-upload">
+                        <label for="pdfFileInput" class="btn-custom btn-upload">
                             <i class="fas fa-file-upload"></i>
-                            <span id="fileInputText">&nbsp;Choose Excel File</span>
-                            <input type="file" id="xlsxFileInput" name="xlsxFile" class="file-input" accept=".xlsx">
+                            <span id="pdfFileInputText">&nbsp;Choose PDF File</span>
+                            <input type="file" id="pdfFileInput" name="pdfFile" class="file-input" accept=".pdf">
                         </label>
-                        <button type="submit" class="btn-custom" id="importButton" disabled>
+                        <button type="submit" class="btn-custom" id="pdfImportButton" disabled>
                             <i class="fas fa-database"></i>
                             <span>&nbsp;Import to Database</span>
                         </button>
                     </form>
                 </div>
-
-                <!-- Display file name and icon -->
-                <div class="file-info" id="fileInfo">
-                    <!-- This will be populated by JavaScript -->
+                <div class="file-info" id="pdfFileInfo">
                 </div>
             </div>
         </div>
     </div>
-    
-
-
-    <!-- Add SweetAlert2 library -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         function toggleSidebar() {
@@ -320,25 +285,35 @@
         });
 
         function logout() {
-            // Implement logout logic here
-            alert('Logging out...');
+            // ใช้ SweetAlert เพื่อยืนยันการออกจากระบบ
+            Swal.fire({
+                title: 'คุณต้องการออกจากระบบใช่หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect ไปยัง logout.php
+                    window.location.href = '../login.php';
+                }
+            });
         }
 
-        // Handle file selection
-        const fileInput = document.getElementById('xlsxFileInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const importButton = document.getElementById('importButton');
+        const pdfFileInput = document.getElementById('pdfFileInput');
+        const pdfFileInfo = document.getElementById('pdfFileInfo');
+        const pdfImportButton = document.getElementById('pdfImportButton');
 
-        fileInput.addEventListener('change', function() {
-            const file = fileInput.files[0];
+        pdfFileInput.addEventListener('change', function () {
+            const file = pdfFileInput.files[0];
             if (file) {
-                // Display the file name and enable the Import button
-                fileInfo.innerHTML = '<i class="fas fa-file-excel"></i>' + file.name;
-                importButton.disabled = false;
+                pdfFileInfo.innerHTML = '<i class="fas fa-file-pdf"></i> ' + file.name;
+                pdfImportButton.disabled = false;
             } else {
-                // Clear file info and disable the Import button
-                fileInfo.innerHTML = '';
-                importButton.disabled = true;
+                pdfFileInfo.innerHTML = '';
+                pdfImportButton.disabled = true;
             }
         });
     </script>
