@@ -66,7 +66,7 @@
     <div class="container">
         <div class="row g-4 settings-section">
             <div class="col-12 col-md-12">
-            <h1 class="app-page-title">ตารางข้อมูลผู้ใช้งาน - Admin</h1>
+            <h1 class="app-page-title">ตารางข้อมูลผู้ดูแลระบบ - </h1>
                 <div class="app-card app-card-settings shadow-sm p-4">
                     <div class="app-card-body">
                         <!-- ปุ่มเพิ่มผู้ดูแลระบบ -->
