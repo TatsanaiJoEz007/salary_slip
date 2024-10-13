@@ -7,12 +7,32 @@
         session_start();
     }
 
-    if (isset($_SESSION['user'])) {
-        $username = $_SESSION['user']['username'];
-    } else {
-        $username = 'Guest'; // หรือค่าที่คุณต้องการแสดงเมื่อไม่พบข้อมูล
+    function fetchUserProfile($conn, $userId) {
+        $stmt = $conn->prepare("SELECT user_firstname, user_lastname FROM tb_user WHERE user_id = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        } else {
+            return [
+                'user_firstname' => 'Guest',
+                'user_lastname' => ''
+            ];
+        }
     }
+    
+    // ตรวจสอบสถานะและข้อความจากการอัปโหลด PDF
+    $status = isset($_GET['status']) ? $_GET['status'] : '';
+    $message = isset($_GET['message']) ? $_GET['message'] : '';
+
+
+    $userId = $_SESSION['user_id'];
+    $myprofile = fetchUserProfile($conn, $userId);
+    
 ?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,10 +43,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <!-- Add Bootstrap CSS for responsiveness -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add Kanit Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Add custom styles -->
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Kanit', sans-serif;
+            font : 18px ;
             margin: 0;
             display: flex;
         }
@@ -43,7 +68,7 @@
             flex-direction: column;
         }
 
-        .sidebar h2 {
+        .sidebar h2, .sidebar h4 {
             margin-top: 0;
         }
 
@@ -58,6 +83,7 @@
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
+            font-size: 18px;
         }
 
         .sidebar a:hover, .logout-btn:hover {
@@ -78,6 +104,9 @@
             padding: 20px;
             box-sizing: border-box;
             transition: box-shadow 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .content.with-shadow {
@@ -130,12 +159,14 @@
 
         /* Custom styles for upload page */
         .container {
-            max-width: 800px;
-            margin: 40px auto;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
         .heading {
@@ -218,26 +249,22 @@
         </button>
         <h2>Sidebar - admin</h2>
     </div>
+
     <div class="sidebar" id="sidebar">
-        <h2>Salary Slip System</h2>
+        <img src="../assets/img/logo/logo.png" alt="logo of wehome" style="padding-left:8px; padding-right:10px;" />
+        <h4>Salary Slip System</h4>
         <a href="upload_page.php">อัปโหลดไฟล์ PDF</a>
         <a href="file_page.php">ไฟล์ PDF</a>
         <a href="admin_system.php">ตารางข้อมูลผู้ดูแลระบบ</a>
         <div class="user-info">
-            <p>ชื่อผู้ใช้: <?php echo htmlspecialchars($username); ?></p>
-            <button class="logout-btn" onclick="logout()">ออกจากระบบ <i class="fas fa-sign-out-alt"></i></button>
+            <p>ชื่อผู้ใช้: <?php echo $myprofile['user_firstname'] . ' ' . $myprofile['user_lastname']; ?></p>
+            <a class="logout-btn" onclick="logout()">ออกจากระบบ <i class="fas fa-sign-out-alt"></i></a>
         </div>
     </div>
+
     <div class="content" id="content">
         <div class="container">
             <h1 class="heading">Upload PDF (.pdf)</h1>
-            <div class="instruction-box">
-                <h2>วิธีการใช้งาน</h2>
-                <ol>
-                    <li>กด <b>Choose PDF File</b> เพื่อเลือกไฟล์ PDF ที่ต้องการอัปโหลด</li>
-                    <li>กด <b>Import to Database</b> เพื่ออัปโหลดข้อมูลเข้าสู่ฐานข้อมูล</li>
-                </ol>
-            </div>
             <div class="section">
                 <h3 class="sub-heading">Upload your PDF File</h3>
                 <div class="buttons">
@@ -253,8 +280,7 @@
                         </button>
                     </form>
                 </div>
-                <div class="file-info" id="pdfFileInfo">
-                </div>
+                <div class="file-info" id="pdfFileInfo"></div>
             </div>
         </div>
     </div>
@@ -266,26 +292,10 @@
             const navbar = document.getElementById('navbar');
             sidebar.classList.toggle('active');
             content.classList.toggle('with-shadow');
-            if (sidebar.classList.contains('active')) {
-                navbar.style.display = 'none';
-            } else {
-                navbar.style.display = 'flex';
-            }
+            navbar.style.display = sidebar.classList.contains('active') ? 'none' : 'flex';
         }
 
-        document.getElementById('content').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('content');
-            const navbar = document.getElementById('navbar');
-            if (sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-                content.classList.remove('with-shadow');
-                navbar.style.display = 'flex';
-            }
-        });
-
         function logout() {
-            // ใช้ SweetAlert เพื่อยืนยันการออกจากระบบ
             Swal.fire({
                 title: 'คุณต้องการออกจากระบบใช่หรือไม่?',
                 icon: 'warning',
@@ -296,7 +306,6 @@
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirect ไปยัง logout.php
                     window.location.href = '../login.php';
                 }
             });
@@ -309,13 +318,25 @@
         pdfFileInput.addEventListener('change', function () {
             const file = pdfFileInput.files[0];
             if (file) {
-                pdfFileInfo.innerHTML = '<i class="fas fa-file-pdf"></i> ' + file.name;
+                pdfFileInfo.innerHTML = `<i class="fas fa-file-pdf"></i> ${file.name}`;
                 pdfImportButton.disabled = false;
             } else {
                 pdfFileInfo.innerHTML = '';
                 pdfImportButton.disabled = true;
             }
         });
+
+        // แสดงการแจ้งเตือนด้วย SweetAlert2 ตามสถานะ
+        const status = "<?php echo $status; ?>";
+        const message = "<?php echo $message; ?>";
+
+        if (status) {
+            Swal.fire({
+                icon: status === 'success' ? 'success' : 'error',
+                title: status === 'success' ? 'สำเร็จ' : 'เกิดข้อผิดพลาด',
+                text: message
+            });
+        }
     </script>
 </body>
 </html>

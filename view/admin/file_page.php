@@ -1,8 +1,29 @@
+<!DOCTYPE html>
+<html lang="th">
 <?php
     require_once('../config/connect.php');
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
+
+    function fetchUserProfile($conn, $userId) {
+        $stmt = $conn->prepare("SELECT user_firstname, user_lastname FROM tb_user WHERE user_id = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        } else {
+            return [
+                'user_firstname' => 'Guest',
+                'user_lastname' => ''
+            ];
+        }
+    }
+
+    $userId = $_SESSION['user_id'];
+    $myprofile = fetchUserProfile($conn, $userId);
 
     // ดึงข้อมูลไฟล์ PDF ทั้งหมดจากฐานข้อมูล
     $pdfFiles = [];
@@ -15,19 +36,18 @@
         }
     }
 ?>
-
-
-<!DOCTYPE html>
-<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Exal</title>
+    <title>File Page</title>
     <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Kanit', sans-serif;
             margin: 0;
             display: flex;
         }
@@ -39,12 +59,15 @@
             height: 100vh;
             padding: 20px;
             box-sizing: border-box;
-            transition: transform 0.3s ease;
             display: flex;
             flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
-        .sidebar h2 {
+        .sidebar h2, .sidebar h4 {
             margin-top: 0;
         }
 
@@ -59,6 +82,7 @@
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
+            font-size: 18px;
         }
 
         .sidebar a:hover, .logout-btn:hover {
@@ -77,8 +101,12 @@
         .content {
             flex-grow: 1;
             padding: 20px;
+            margin-left: 250px;
             box-sizing: border-box;
             transition: box-shadow 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .content.with-shadow {
@@ -129,7 +157,6 @@
             }
         }
 
-        /* ปรับแต่ง card */
         .file-card {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
@@ -153,10 +180,9 @@
 
         .file-card-actions {
             display: flex;
-            gap: 10px; /* ระยะห่างระหว่างปุ่ม */
+            gap: 10px;
         }
 
-        /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 12px;
         }
@@ -166,7 +192,6 @@
             border-radius: 10px;
         }
 
-        /* Container Styling */
         .home-section {
             max-height: 100vh;
             overflow-y: auto;
@@ -179,6 +204,8 @@
     </style>
 </head>
 <body>
+
+
     <div class="navbar" id="navbar">
         <button class="menu-btn" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
@@ -186,49 +213,47 @@
         <h2>Sidebar - admin</h2>
     </div>
     <div class="sidebar" id="sidebar">
-        <h2>Salary Slip System</h2>
-        <a href="upload_page.php">อัปโหลดไฟล์ Excel</a>
-        <a href="file_page.php">ไฟล์ Excel</a>
+        <img src="../assets/img/logo/logo.png" alt="logo of wehome" weight="50px" height="70px" style="padding-left:8px; padding-right:10px;" />
+        <h4>Salary Slip System</h4>
+        <a href="upload_page.php">อัปโหลดไฟล์ PDF</a>
+        <a href="file_page.php">ไฟล์ PDF</a>
         <a href="admin_system.php">ตารางข้อมูลผู้ดูแลระบบ</a>
         <div class="user-info">
-            <button class="logout-btn" onclick="logout()">ชื่อผู้ใช้: ดึงจาก session ที่ login เข้ามา <i class="fas fa-sign-out-alt"></i></button>
+            <p>ชื่อผู้ใช้: <?php echo $myprofile['user_firstname'] ?>&nbsp; <?php echo $myprofile['user_lastname'] ?></p>
+            <a class="logout-btn" onclick="logout()">ออกจากระบบ <i class="fas fa-sign-out-alt"></i></a>
         </div>
     </div>
+
+
     <div class="content" id="content">
-    <div class="container">
-        <div class="row g-4 settings-section">
-            <div class="col-12 col-md-12">
-                <h5 class="app-page-title">ตารางไฟล์ PDF</h5>
-                <div class="app-card app-card-settings shadow-sm p-4">
-                    <div class="app-card-body">
-                        <!-- ส่วนแสดงไฟล์ในรูปแบบ card -->
-                        <?php if (!empty($pdfFiles)): ?>
-                            <?php foreach ($pdfFiles as $file): ?>
-                                <div class="file-card">
-                                    <div>
-                                        <div class="file-card-title">ชื่อไฟล์: <?= htmlspecialchars($file['pdf_name']) ?></div>
-                                        <div class="file-card-time">เวลาอัปโหลด: <?= $file['uploaded_at'] ?></div>
+        <div class="container">
+            <div class="row g-4 settings-section">
+                <div class="col-12 col-md-12">
+                    <h5 class="app-page-title">ตารางไฟล์ PDF</h5>
+                    <div class="app-card app-card-settings shadow-sm p-4">
+                        <div class="app-card-body">
+                            <?php if (!empty($pdfFiles)): ?>
+                                <?php foreach ($pdfFiles as $file): ?>
+                                    <div class="file-card">
+                                        <div>
+                                            <div class="file-card-title">ชื่อไฟล์: <?= htmlspecialchars($file['pdf_name']) ?></div>
+                                            <div class="file-card-time">เวลาอัปโหลด: <?= $file['uploaded_at'] ?></div>
+                                        </div>
+                                        <div class="file-card-actions">
+                                            <a href="function/download_pdf.php?id=<?= $file['pdf_id'] ?>" class="btn btn-primary btn-sm">ดาวน์โหลดไฟล์</a>
+                                            <button class="btn btn-danger btn-sm" onclick="deletePDF(<?= $file['pdf_id'] ?>)">ลบไฟล์</button>
+                                        </div>
                                     </div>
-                                    <div class="file-card-actions">
-                                        <a href="function/download_pdf.php?id=<?= $file['pdf_id'] ?>" class="btn btn-primary btn-sm">ดาวน์โหลดไฟล์</a>
-                                        <button class="btn btn-danger btn-sm" onclick="deletePDF(<?= $file['pdf_id'] ?>)">ลบไฟล์</button>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <p>ไม่มีไฟล์ PDF ที่อัปโหลด</p>
-                        <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p>ไม่มีไฟล์ PDF ที่อัปโหลด</p>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    </div>
-
-
-
-                            
-
     <script src="https://fastly.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -245,20 +270,57 @@
             }
         }
 
-        document.getElementById('content').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const content = document.getElementById('content');
-            const navbar = document.getElementById('navbar');
-            if (sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-                content.classList.remove('with-shadow');
-                navbar.style.display = 'flex';
-            }
-        });
+        function deletePDF(pdf_id) {
+            Swal.fire({
+                title: 'คุณแน่ใจหรือไม่?',
+                text: "คุณต้องการลบไฟล์นี้ใช่หรือไม่!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ใช่, ลบเลย!',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ส่งคำร้องขอไปยัง delete_pdf.php
+                    fetch('function/delete_pdf.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `pdf_id=${pdf_id}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('ลบไฟล์สำเร็จ', data.message, 'success').then(() => {
+                                location.reload(); // รีเฟรชหน้าหลังจากลบไฟล์สำเร็จ
+                            });
+                        } else {
+                            Swal.fire('เกิดข้อผิดพลาด', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
+                    });
+                }
+            });
+        }
 
         function logout() {
-            // Implement logout logic here
-            alert('Logging out...');
+            Swal.fire({
+                title: 'คุณต้องการออกจากระบบใช่หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '../login.php';
+                }
+            });
         }
     </script>
 </body>

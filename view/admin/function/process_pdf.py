@@ -54,38 +54,63 @@ for page_num in range(pdf_document.page_count):
     top_half_pdf.save(top_pdf_path)
     bottom_half_pdf.save(bottom_pdf_path)
 
-    def extract_emp_id(text):
+    def extract_emp_info(text):
         # ใช้ regex เพื่อค้นหาเลขพนักงานที่ขึ้นต้นด้วย "P" และตามด้วยตัวเลข
-        match = re.search(r'\bP\d{4,}\b', text)  # เลขพนักงานที่มี 4 ตัวอักษรขึ้นไป
-        if match:
-            return match.group(0)
+        emp_id_match = re.search(r'\bP\d{4,}\b', text)  # เลขพนักงานที่มี 4 ตัวอักษรขึ้นไป
+        emp_id = emp_id_match.group(0) if emp_id_match else 'unknown'
         
-        # ถ้าไม่พบในรูปแบบข้างต้น ลองหาโดยดูบริบทเพิ่มเติม (เช่นคำว่า "รหัสพนักงาน" หรือ "Emp")
-        match = re.search(r'(รหัสพนักงาน|Emp|Employee ID)\s*[:\-]?\s*(P\d+)', text, re.IGNORECASE)
-        if match:
-            return match.group(2)
+        # ใช้ regex เพื่อค้นหาชื่อพนักงานหลังเลขพนักงาน
+        emp_name_match = re.search(r'P\d{4,}\s*(?:ชื่อสกุล|Name|Emp)?[:\-]?\s*([^\n]*)', text, re.IGNORECASE)
+        emp_name = emp_name_match.group(1).strip() if emp_name_match else 'unknown'
 
-        # หากยังไม่พบ ให้ลองค้นหาด้วยรูปแบบอื่น ๆ ตามที่เห็นในไฟล์
-        lines = text.split("\n")
-        for line in lines:
-            if re.match(r'P\d{4,}', line.strip()):
-                return line.strip()
+        # ใช้ regex เพื่อค้นหาแผนกพนักงานหลังคำว่า "Dep."
+        emp_dep_match = re.search(r'Dep\.\s*(\S.*)', text)
+        emp_dep = emp_dep_match.group(1).strip() if emp_dep_match else 'unknown'
 
-        # หากไม่พบเลขพนักงาน ให้คืนค่าเป็น "unknown"
-        return 'unknown'
+        # แก้ไขคำที่มีสระอำผิดปกติเป็นสระอา
+        emp_name = re.sub(r'ำ', 'า', emp_name)
+        emp_dep = re.sub(r'ำ', 'า', emp_dep)
 
-    # แยก emp_id สำหรับครึ่งบนและครึ่งล่าง
-    emp_id_top = extract_emp_id(top_half)
-    emp_id_bottom = extract_emp_id(bottom_half)
+        return emp_id, emp_name, emp_dep
+
+    def extract_salary_details(text):
+        # ใช้ regex เพื่อดึงข้อมูลรวมเงินได้ (สีเขียว)
+        salary_income_match = re.search(r'รวมเงินได้\s*[:\-]?\s*([\d,]+\.\d{2})', text)
+        salary_income = float(salary_income_match.group(1).replace(',', '')) if salary_income_match else 0.0
+
+        # ใช้ regex เพื่อดึงข้อมูลรวมเงินหัก (สีแดง)
+        salary_deduction_match = re.search(r'รวมเงินหัก\s*[:\-]?\s*([\d,]+\.\d{2})', text)
+        salary_deduction = float(salary_deduction_match.group(1).replace(',', '')) if salary_deduction_match else 0.0
+
+        # ใช้ regex เพื่อดึงข้อมูลรวมเงินสุทธิ (สีม่วง)
+        salary_net_match = re.search(r'เงินได้สุทธิ\s*[:\-]?\s*([\d,]+\.\d{2})', text)
+        salary_net = float(salary_net_match.group(1).replace(',', '')) if salary_net_match else 0.0
+
+        return salary_income, salary_deduction, salary_net
+
+    # แยก emp_id, emp_name, emp_dep และรายละเอียดเงินเดือน สำหรับครึ่งบนและครึ่งล่าง
+    emp_id_top, emp_name_top, emp_dep_top = extract_emp_info(top_half)
+    salary_income_top, salary_deduction_top, salary_net_top = extract_salary_details(top_half)
+
+    emp_id_bottom, emp_name_bottom, emp_dep_bottom = extract_emp_info(bottom_half)
+    salary_income_bottom, salary_deduction_bottom, salary_net_bottom = extract_salary_details(bottom_half)
 
     # บันทึกข้อมูลในครึ่งบนพร้อม path ของไฟล์ PDF
-    sql_top = "INSERT INTO tb_payslips (emp_id, page_number, part, content, slip_divide) VALUES (%s, %s, %s, %s, %s)"
-    cursor.execute(sql_top, (emp_id_top, page_num + 1, 'top', top_half, top_pdf_path))
+    sql_top = """
+        INSERT INTO tb_payslips (
+            emp_id, emp_name, emp_dep, salary_income, salary_deduction, salary_net, page_number, part, content, slip_divide
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.execute(sql_top, (emp_id_top, emp_name_top, emp_dep_top, salary_income_top, salary_deduction_top, salary_net_top, page_num + 1, 'top', top_half, top_pdf_path))
     conn.commit()
 
     # บันทึกข้อมูลในครึ่งล่างพร้อม path ของไฟล์ PDF
-    sql_bottom = "INSERT INTO tb_payslips (emp_id, page_number, part, content, slip_divide) VALUES (%s, %s, %s, %s, %s)"
-    cursor.execute(sql_bottom, (emp_id_bottom, page_num + 1, 'bottom', bottom_half, bottom_pdf_path))
+    sql_bottom = """
+        INSERT INTO tb_payslips (
+            emp_id, emp_name, emp_dep, salary_income, salary_deduction, salary_net, page_number, part, content, slip_divide
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.execute(sql_bottom, (emp_id_bottom, emp_name_bottom, emp_dep_bottom, salary_income_bottom, salary_deduction_bottom, salary_net_bottom, page_num + 1, 'bottom', bottom_half, bottom_pdf_path))
     conn.commit()
 
 # ปิดการเชื่อมต่อและปิดไฟล์ PDF

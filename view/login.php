@@ -10,6 +10,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://fastly.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -17,6 +18,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            font-family: 'Kanit', sans-serif; /* Use Kanit font */
         }
 
         .login {
@@ -115,11 +117,11 @@
                             <input type="password" class="form-control" id="signin-password" name="signin-password" required placeholder="Password">
                         </div>
 
-                        <!-- เพิ่ม checkbox สำหรับ Remember Me -->
+                        <!-- เพิ่ม checkbox สำหรับ Remember Me
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="remember" name="remember">
                             <label class="form-check-label" for="remember">Remember Me</label>
-                        </div>
+                        </div> -->
 
                         <div class="login">
                             <div class="d-grid gap-2">

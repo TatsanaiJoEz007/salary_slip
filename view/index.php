@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="th">
 
+<?php require_once('config/connect.php'); ?>
+
 <head>
     <title>Track Page</title>
     <meta charset="utf-8">
@@ -8,7 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Kanit', sans-serif;
+        }
+
         /* Card Styling */
         .track-card {
             display: flex;
@@ -118,39 +126,61 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelector('.track-button').addEventListener('click', function () {
-                var trackingId = document.getElementById('trackingIdInput').value;
+        document.querySelector('.track-button').addEventListener('click', function () {
+            var trackingId = document.getElementById('trackingIdInput').value.trim();
 
-                // Using AJAX to send trackingId to search_tracking.php
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', 'function/search_tracking.php', true);
-                xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState == 4 && xhr.status == 200) {
-                        var response = JSON.parse(xhr.responseText.trim());
-                        if (response.status === 'match') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Tracking ID:',
-                                text: trackingId,
-                                showConfirmButton: false,
-                                timer: 1500
-                            }).then(function () {
-                                window.location.href = `../view/tracking_page.php?trackingId=${encodeURIComponent(trackingId)}`;
-                            });
-                        } else {
+            if (trackingId === "") {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'กรุณากรอกเลขพนักงาน',
+                    text: 'เลขพนักงานไม่ควรเป็นค่าว่าง'
+                });
+                return;
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'function/search_tracking.php', true);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    console.log(xhr.responseText); // ดูว่ามีอะไรที่ส่งกลับมา
+                    if (xhr.status == 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText.trim());
+                            if (response.status === 'match') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'พบข้อมูลพนักงาน',
+                                    text: 'กำลังนำคุณไปยังสลิปเงินเดือน...',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(function () {
+                                    window.location.href = `employee/salary_slip.php?emp_id=${encodeURIComponent(trackingId)}`;
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'ไม่พบเลขพนักงาน',
+                                    text: 'กรุณาตรวจสอบเลขพนักงานอีกครั้ง'
+                                });
+                            }
+                        } catch (e) {
+                            console.error('JSON parsing error:', e); // แสดง error ถ้า JSON ผิดพลาด
                             Swal.fire({
                                 icon: 'error',
-                                title: 'ไม่พบเลขพัสดุ',
-                                text: 'กรุณาตรวจสอบเลข Tracking Number อีกครั้ง'
+                                title: 'เกิดข้อผิดพลาด',
+                                text: 'ไม่สามารถประมวลผลข้อมูลได้'
                             });
                         }
+                    } else {
+                        console.error('Error:', xhr.status, xhr.statusText);
                     }
-                };
-                xhr.send('trackingId=' + encodeURIComponent(trackingId));
-            });
+                }
+            };
+            xhr.send('trackingId=' + encodeURIComponent(trackingId));
         });
+
     </script>
 </body>
 

@@ -3,6 +3,7 @@
 <?php
     require_once('../config/connect.php');
 
+    // Start session only if it hasn't started yet
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
@@ -39,9 +40,11 @@
     <!-- Add Bootstrap CSS for responsiveness -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Add custom styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Kanit', sans-serif;
+            font : 18px ;
             margin: 0;
             display: flex;
         }
@@ -58,7 +61,7 @@
             flex-direction: column;
         }
 
-        .sidebar h2 {
+        .sidebar h2, .sidebar h4 {
             margin-top: 0;
         }
 
@@ -73,6 +76,7 @@
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
+            font-size: 18px;
         }
 
         .sidebar a:hover, .logout-btn:hover {
@@ -93,6 +97,9 @@
             padding: 20px;
             box-sizing: border-box;
             transition: box-shadow 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .content.with-shadow {
@@ -145,12 +152,14 @@
 
         /* Custom styles for upload page */
         .container {
-            max-width: 800px;
-            margin: 40px auto;
+            max-width: 5000px;
+            width: 1000px;
+            margin: 0 auto;
             padding: 20px;
             background-color: #fff;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
         .heading {
@@ -234,115 +243,77 @@
         <h2>Sidebar - admin</h2>
     </div>
     <div class="sidebar" id="sidebar">
-        <h2>Salary Slip System</h2>
-        <a href="upload_page.php">อัปโหลดไฟล์ Excel</a>
-        <a href="file_page.php">ไฟล์ Excel</a>
+    <img src="../assets/img/logo/logo.png" alt="logo of wehome" weight="50px" height="70px" style="padding-left:8px; padding-right:10px;" />
+        <h4>Salary Slip System</h4>
+        <a href="upload_page.php">อัปโหลดไฟล์ PDF</a>
+        <a href="file_page.php">ไฟล์ PDF</a>
         <a href="admin_system.php">ตารางข้อมูลผู้ดูแลระบบ</a>
         <div class="user-info">
-            <button class="logout-btn" onclick="logout()">ชื่อผู้ใช้: ดึงจาก session ที่ login เข้ามา <i class="fas fa-sign-out-alt"></i></button>
+            <p>ชื่อผู้ใช้: admin admin</p>
+            <a class="logout-btn" onclick="logout()">ออกจากระบบ <i class="fas fa-sign-out-alt"></i></a> <!-- updated logout link -->
         </div>
     </div>
     <div class="content" id="content">
-        <div class="container">
-            <h1 class="heading">ตารางข้อมูลผู้ดูแลระบบ</h1>
-            <div class="mb-4">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdminModal">
-                    เพิ่มผู้ดูแลระบบ
-                </button>
-                <button type="button" class="btn btn-danger" id="deleteSelected">
-                    ลบผู้ใช้ที่เลือก
-                </button>
-            </div>
-            <div class="table-responsive mt-4">
-                <table class="table table-striped" id="Tableall">
-                    <thead>
-                        <tr>
-                            <th scope="col" style="text-align: center;"><input type="checkbox" id="selectAll"></th>
-                            <th scope="col" style="text-align: center;">#</th>
-                            <th scope="col" style="text-align: center;">ชื่อ</th>
-                            <th scope="col" style="text-align: center;">นามสกุล</th>
-                            <th scope="col" style="text-align: center;">อีเมล์</th>    
-                            <th scope="col" style="text-align: center;">สถานะ</th> 
-                            
-                        </tr>
-                    </thead>
-                    <tbody class="text-center">
-                        <?php
-                        if (!empty($admins)) {
-                            $counter = 1;
-                            foreach ($admins as $admin) {
-                                $status_text = ($admin['user_status'] == 1) ? 'อยู่ในระบบ' : 'ไม่อยู่ในระบบ';
-                                $firstname = htmlspecialchars($admin['user_firstname']);
-                                $lastname = htmlspecialchars($admin['user_lastname']);
-                                $email = htmlspecialchars($admin['user_email']);
-                                
-                                echo "<tr>";
-                                echo "<td><input type='checkbox' class='userCheckbox' data-user-id='" . htmlspecialchars($admin['user_id']) . "'></td>";
-                                echo "<td>" . $counter++ . "</td>";
-                                echo "<td class='align-middle'>" . $firstname . "</td>";
-                                echo "<td class='align-middle'>" . $lastname . "</td>";
-                                echo "<td class='align-middle'>" . $email . "</td>";
-                                echo "<td class='align-middle'>" . $status_text . "</td>";
+        <div class="content-card">
+            <div class="container">
+                <h1 class="heading">ตารางข้อมูลผู้ดูแลระบบ</h1>
+                <div class="mb-4">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdminModal">
+                        เพิ่มผู้ดูแลระบบ
+                    </button>
+                    <button type="button" class="btn btn-danger" id="deleteSelected">
+                        ลบผู้ใช้ที่เลือก
+                    </button>
+                </div>
+                <div class="table-responsive mt-4">
+                    <table class="table table-striped" id="Tableall">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="text-align: center;"><input type="checkbox" id="selectAll"></th>
+                                <th scope="col" style="text-align: center;">#</th>
+                                <th scope="col" style="text-align: center;">ชื่อ</th>
+                                <th scope="col" style="text-align: center;">นามสกุล</th>
+                                <th scope="col" style="text-align: center;">อีเมล์</th>    
+                                <th scope="col" style="text-align: center;">สถานะ</th> 
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            <?php
+                            if (!empty($admins)) {
+                                $counter = 1;
+                                foreach ($admins as $admin) {
+                                    $status_text = ($admin['user_status'] == 1) ? 'อยู่ในระบบ' : 'ไม่อยู่ในระบบ';
+                                    $firstname = htmlspecialchars($admin['user_firstname']);
+                                    $lastname = htmlspecialchars($admin['user_lastname']);
+                                    $email = htmlspecialchars($admin['user_email']);
+                                    
+                                    echo "<tr>";
+                                    echo "<td><input type='checkbox' class='userCheckbox' data-user-id='" . htmlspecialchars($admin['user_id']) . "'></td>";
+                                    echo "<td>" . $counter++ . "</td>";
+                                    echo "<td class='align-middle'>" . $firstname . "</td>";
+                                    echo "<td class='align-middle'>" . $lastname . "</td>";
+                                    echo "<td class='align-middle'>" . $email . "</td>";
+                                    echo "<td class='align-middle'>" . $status_text . "</td>";
 
-                                echo "</tr>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='7'>ไม่มีข้อมูลผู้ดูแลระบบ</td></tr>";
                             }
-                        } else {
-                            echo "<tr><td colspan='7'>ไม่มีข้อมูลผู้ดูแลระบบ</td></tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Modal สำหรับเพิ่มข้อมูลผู้ดูแลระบบ -->
-        <div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addAdminModalLabel">เพิ่มข้อมูลผู้ดูแลระบบ</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="function/add_admin.php" method="post" id="register">
-                            <div class="mb-3">
-                                <label for="admin_firstname" class="form-label">ชื่อ</label>
-                                <input type="text" class="form-control" id="admin_firstname" name="admin_firstname" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="admin_lastname" class="form-label">นามสกุล</label>
-                                <input type="text" class="form-control" id="admin_lastname" name="admin_lastname" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="admin_email" class="form-label">อีเมล</label>
-                                <input type="email" class="form-control" id="admin_email" name="admin_email" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="admin_pass" class="form-label">รหัสผ่าน</label>
-                                <input type="password" class="form-control" id="admin_pass" name="admin_pass" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="admin_status" class="form-label">สถานะ</label>
-                                <select class="form-select" id="admin_status" name="admin_status" required>
-                                    <option value="1">อยู่ในระบบ</option>
-                                    <option value="0">ไม่อยู่ในระบบ</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
-                        <button type="submit" form="register" class="btn btn-primary">บันทึกข้อมูล</button>
-                    </div>
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript ที่ต้องใช้ -->
-
     <script>
-     
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const deleteSelected = document.getElementById('deleteSelected');
             if (deleteSelected) {
@@ -375,7 +346,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $.ajax({
-                                url: 'function/delete_admin.php', // เส้นทางของ delete_admin.php
+                                url: 'function/delete_admin.php', 
                                 type: 'post',
                                 contentType: 'application/json',
                                 data: JSON.stringify({
@@ -392,7 +363,7 @@
                                             timer: 1500
                                         });
                                         setTimeout(function() {
-                                            location.reload(); // รีเฟรชหน้าเพื่ออัปเดตข้อมูล
+                                            location.reload(); 
                                         }, 1500);
                                     } else {
                                         Swal.fire({
@@ -420,58 +391,27 @@
             }
         });
 
+        function logout() {
+            Swal.fire({
+                title: 'คุณต้องการออกจากระบบใช่หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '../login.php';
+                }
+            });
+        }
+
     </script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- JavaScript สำหรับการส่งข้อมูลฟอร์ม -->
-<script>
-    $(document).ready(function () {
-        $('#register').on('submit', function (e) {
-            e.preventDefault(); // ป้องกันการรีเฟรชหน้าเมื่อกด submit
-            
-            $.ajax({
-                url: 'function/add_admin.php', // เส้นทางของ add_admin.php ที่สอดคล้องกับโครงสร้างของคุณ
-                type: 'POST',
-                data: $(this).serialize(),
-                dataType: 'json',
-                success: function (response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'เพิ่มข้อมูลสำเร็จ',
-                            text: response.message,
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then(() => {
-                            $('#addAdminModal').modal('hide'); // ปิด modal
-                            location.reload(); // รีเฟรชหน้าเพื่ออัปเดตข้อมูลในตาราง
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'เกิดข้อผิดพลาด',
-                            text: response.message,
-                            showConfirmButton: true
-                        });
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error(xhr.responseText); // แสดงข้อความ error ใน console สำหรับการตรวจสอบ
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'เกิดข้อผิดพลาด',
-                        text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้',
-                        showConfirmButton: true
-                    });
-                }
-            });
-        });
-    });
-</script>
-    
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
