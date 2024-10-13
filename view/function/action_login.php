@@ -78,7 +78,7 @@ if ($stmt->num_rows === 1) {
 
         // กำหนดเส้นทางการเปลี่ยนเส้นทางตามประเภทผู้ใช้
         if ($user_type == 999) { // admin
-            $response['redirect'] = 'admin/upload_page.php';
+            $response['redirect'] = 'admin/upload_page';
             $response['success'] = true;
             $response['message'] = 'เข้าสู่ระบบสำเร็จ!!';
         } else {

@@ -213,11 +213,11 @@
         <h2>Sidebar - admin</h2>
     </div>
     <div class="sidebar" id="sidebar">
-        <img src="../assets/img/logo/logo.png" alt="logo of wehome" weight="50px" height="70px" style="padding-left:8px; padding-right:10px;" />
+    <img src="../assets/img/logo/logo.png" alt="logo of wehome" style="padding-left:8px; padding-right:10px;" />
         <h4>Salary Slip System</h4>
-        <a href="upload_page.php">อัปโหลดไฟล์ PDF</a>
-        <a href="file_page.php">ไฟล์ PDF</a>
-        <a href="admin_system.php">ตารางข้อมูลผู้ดูแลระบบ</a>
+        <a href="upload_page">อัปโหลดไฟล์ PDF</a>
+        <a href="file_page">ไฟล์ PDF</a>
+        <a href="admin_system">ตารางข้อมูลผู้ดูแลระบบ</a>
         <div class="user-info">
             <p>ชื่อผู้ใช้: <?php echo $myprofile['user_firstname'] ?>&nbsp; <?php echo $myprofile['user_lastname'] ?></p>
             <a class="logout-btn" onclick="logout()">ออกจากระบบ <i class="fas fa-sign-out-alt"></i></a>

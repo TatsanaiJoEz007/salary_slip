@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Add Favicon -->
+    <link rel="icon" href="assets/img/logo/logo.png" type="image/x-icon">
     <style>
         body {
             background-color: #f8f9fa;
@@ -156,7 +158,7 @@
                                     showConfirmButton: false,
                                     timer: 1500
                                 }).then(function () {
-                                    window.location.href = `employee/salary_slip.php?emp_id=${encodeURIComponent(trackingId)}`;
+                                    window.location.href = `employee/salary_slip?emp_id=${encodeURIComponent(trackingId)}`;
                                 });
                             } else {
                                 Swal.fire({

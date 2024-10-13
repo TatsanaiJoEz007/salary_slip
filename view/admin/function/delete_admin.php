@@ -11,9 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // ตรวจสอบว่ามี user_ids ที่ส่งมาและไม่เป็นค่าว่าง
     if (!empty($user_ids)) {
-        // เตรียมคำสั่ง SQL สำหรับอัปเดตสถานะผู้ใช้ที่เลือก
+        // เตรียมคำสั่ง SQL สำหรับลบผู้ใช้ที่เลือก
         $placeholders = implode(',', array_fill(0, count($user_ids), '?'));
-        $sql = "UPDATE tb_user SET user_status = 0 WHERE user_id IN ($placeholders)";
+        $sql = "DELETE FROM tb_user WHERE user_id IN ($placeholders)";
         $stmt = $conn->prepare($sql);
 
         if ($stmt) {
