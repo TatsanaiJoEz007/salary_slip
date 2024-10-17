@@ -27,7 +27,7 @@
 
     // ดึงข้อมูลไฟล์ PDF ทั้งหมดจากฐานข้อมูล
     $pdfFiles = [];
-    $sql = "SELECT pdf_id, pdf_name, uploaded_at FROM tb_pdf_files";
+    $sql = "SELECT pdf_id, original_pdf_name, uploaded_at FROM tb_pdf_files";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
@@ -237,7 +237,7 @@
                                 <?php foreach ($pdfFiles as $file): ?>
                                     <div class="file-card">
                                         <div>
-                                            <div class="file-card-title">ชื่อไฟล์: <?= htmlspecialchars($file['pdf_name']) ?></div>
+                                            <div class="file-card-title">ชื่อไฟล์: <?= htmlspecialchars($file['original_pdf_name']) ?></div>
                                             <div class="file-card-time">เวลาอัปโหลด: <?= $file['uploaded_at'] ?></div>
                                         </div>
                                         <div class="file-card-actions">

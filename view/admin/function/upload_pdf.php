@@ -6,21 +6,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['pdfFile'])) {
 
     if ($pdfFile['type'] == 'application/pdf') {
         $pdfData = file_get_contents($pdfFile['tmp_name']);
-        $pdfName = $pdfFile['name'];
+        $originalPdfName = $pdfFile['name'];
 
-        $stmt = $conn->prepare("INSERT INTO tb_pdf_files (pdf_name, pdf_data) VALUES (?, ?)");
+        // สร้างชื่อไฟล์ที่ปลอดภัยสำหรับการบันทึก
+        $pdfExtension = pathinfo($originalPdfName, PATHINFO_EXTENSION);
+        $safeFileName = uniqid('pdf_', true) . '.' . $pdfExtension;
+
+        // เก็บชื่อไฟล์เดิมและชื่อไฟล์ใหม่ลงฐานข้อมูล
+        $stmt = $conn->prepare("INSERT INTO tb_pdf_files (pdf_name, pdf_data, original_pdf_name) VALUES (?, ?, ?)");
         if ($stmt) {
             $null = NULL;
-            $stmt->bind_param("sb", $pdfName, $null);
+            $stmt->bind_param("sbs", $safeFileName, $null, $originalPdfName);
             $stmt->send_long_data(1, $pdfData);
 
             if ($stmt->execute()) {
                 $pdf_id = $stmt->insert_id;
-                $uploaded_file_path = 'uploads/' . $pdfName;
+                $uploaded_file_path = 'uploads/' . $safeFileName;
                 file_put_contents($uploaded_file_path, $pdfData);
 
                 $python_script_path = 'process_pdf.py';
-                $command = escapeshellcmd("python $python_script_path $uploaded_file_path $pdf_id");
+                // ใช้ escapeshellarg() กับพารามิเตอร์
+                $command = escapeshellcmd("python $python_script_path " . escapeshellarg($uploaded_file_path) . " " . escapeshellarg($pdf_id));
                 $output = shell_exec($command);
 
                 if ($output) {

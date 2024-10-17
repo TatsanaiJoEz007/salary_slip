@@ -5,3 +5,6 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [L,QSA]
+
+# ป้องกันการเข้าถึงไฟล์หรือเส้นทางที่กำหนด (ทั้งมีและไม่มี .php)
+RewriteRule ^(admin_system|file_page|upload_page)(\.php)?$ - [R=404,L]
