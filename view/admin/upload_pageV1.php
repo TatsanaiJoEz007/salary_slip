@@ -241,6 +241,75 @@
             background-color: #FF5722;
             border-radius: 10px;
         }
+
+
+        .sticky-dropdown {
+            position: sticky;
+            top: 10px; /* ให้ตำแหน่งติดกับด้านบน */
+            z-index: 100;
+            width: calc(100% - 20px); /* กำหนดความกว้างเท่ากรอบสีแดง */
+            margin: 10px auto;
+        }
+
+        .searchable {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            border: 2px solid red; /* กำหนดให้ขอบเป็นสีแดงเหมือนกรอบ */
+            border-radius: 5px;
+        }
+
+        .input-group {
+            width: calc(100% - 20px);
+            margin: 10px auto;
+            border: 2px solid red;
+            border-radius: 5px;
+        }
+
+                /* กำหนดความกว้างและจัดรูปแบบ dropdown ให้เหมาะสม */
+        .dropdown-container {
+            width: 100%; /* ทำให้ dropdown container มีความกว้างเต็ม */
+            max-width: 600px; /* จำกัดความกว้างสูงสุด */
+            height: 20px; /* สืบทอดความสูงจาก element ที่ครอบ */
+            margin: 150px auto; /* จัดให้อยู่กึ่งกลาง */
+            position: sticky; /* ทำให้ sticky เมื่อ scroll */
+            top: 10px; /* ระยะห่างจากด้านบน */
+            z-index: 1000; /* จัดให้อยู่ด้านหน้า */
+            display: flex;  /* จัดให้อยู่ในแนวนอน */
+            align-items:  center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
+            border: 2px solid red; /* ขอบสีแดงตามต้องการ */
+            border-radius: 8px;
+            padding: 10px;
+            background-color: white; /* พื้นหลังสีขาว */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* จัดรูปแบบ select ให้เหมือน search box */
+        .dropdown-container select {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            padding: 8px;
+            border-radius: 8px;
+            background-color: transparent;
+        }
+
+        /* เพิ่มไอคอนค้นหา */
+        .dropdown-container .search-icon {
+            margin-right: 10px;
+            font-size: 24px;
+            color: gray;
+        }
+
+        /* สำหรับหน้าจอขนาดเล็ก */
+        @media (max-width: 768px) {
+            .dropdown-container {
+                width: calc(100% - 40px);
+            }
+        }
+
+
     </style>
 </head>
 <body>
@@ -263,7 +332,35 @@
         </div>
     </div>
 
+    
+
+
+
+
+
+
+
+
+
     <div class="content" id="content">
+        <div class="dropdown">
+        <div class="dropdown-container">
+        <i class="fas fa-search search-icon"></i>
+        <select class="form-select" id="searchableDropdown" aria-label="Select option">
+            <option selected>Select an option</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="G">G</option>
+            <option value="H">H</option>
+            <option value="I">I</option>
+            <option value="J">J</option>
+        </select>
+    </div>
+        </div>
         <div class="container">
             <h1 class="heading">Upload PDF (.pdf)</h1>
             <div class="section">
@@ -338,6 +435,23 @@
                 text: message
             });
         }
+
+
+        // ทำให้ dropdown เป็น searchable ด้วยการกรองข้อมูล
+            document.getElementById('searchableDropdown').addEventListener('input', function () {
+                const filter = this.value.toLowerCase();
+                const options = this.getElementsByTagName('option');
+                
+                for (let i = 1; i < options.length; i++) { // เริ่มที่ 1 เพื่อข้าม option 'Select an option'
+                    const text = options[i].textContent.toLowerCase();
+                    if (text.includes(filter)) {
+                        options[i].style.display = '';
+                    } else {
+                        options[i].style.display = 'none';
+                    }
+                }
+            });
+
     </script>
 </body>
 </html>

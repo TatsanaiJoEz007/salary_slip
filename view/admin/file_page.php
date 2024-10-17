@@ -45,6 +45,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="../assets/img/logo/logo.png" type="image/x-icon">
     <style>
         body {
             font-family: 'Kanit', sans-serif;
@@ -213,7 +214,7 @@
         <h2>Sidebar - admin</h2>
     </div>
     <div class="sidebar" id="sidebar">
-    <img src="../assets/img/logo/logo.png" alt="logo of wehome" style="padding-left:8px; padding-right:10px;" />
+    <img src="../assets/img/logo/logo.png" alt="logo" style="padding-left:8px; padding-right:10px;" />
         <h4>Salary Slip System</h4>
         <a href="upload_page">อัปโหลดไฟล์ PDF</a>
         <a href="file_page">ไฟล์ PDF</a>
@@ -229,7 +230,7 @@
         <div class="container">
             <div class="row g-4 settings-section">
                 <div class="col-12 col-md-12">
-                    <h5 class="app-page-title">ตารางไฟล์ PDF</h5>
+                    <h5 class="app-page-title">ไฟล์ PDF ในระบบ</h5>
                     <div class="app-card app-card-settings shadow-sm p-4">
                         <div class="app-card-body">
                             <?php if (!empty($pdfFiles)): ?>
@@ -318,7 +319,7 @@
                 cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = '../login.php';
+                    window.location.href = '../login';
                 }
             });
         }

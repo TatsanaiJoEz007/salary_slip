@@ -127,6 +127,7 @@ $conn->close();
 <body>
     <div class="salary-slip-container">
         <div class="company-info">
+            <img src="../assets/img/logo/logo.png" alt="Logo" class="img-fluid logo-img" style="padding-left:8px; padding-right:10px; width: 200px;">
             <h2>บริษัท เอส.ที.เอ็ม. โปร เซอร์วิส จำกัด</h2>
             <p>สลิปเงินเดือนพนักงาน</p>
         </div>
