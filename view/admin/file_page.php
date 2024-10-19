@@ -2,8 +2,17 @@
 <html lang="th">
 <?php
     require_once('../config/connect.php');
+    session_start();
+    
+
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
+    }
+
+    // ตรวจสอบสิทธิ์การเข้าถึง
+    if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] != 999) {
+        header('Location: ../error404');
+        exit();
     }
 
     function fetchUserProfile($conn, $userId) {
@@ -309,20 +318,20 @@
         }
 
         function logout() {
-            Swal.fire({
-                title: 'คุณต้องการออกจากระบบใช่หรือไม่?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'ออกจากระบบ',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '../login';
-                }
-            });
-        }
+                Swal.fire({
+                    title: 'คุณต้องการออกจากระบบใช่หรือไม่?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'ออกจากระบบ',
+                    cancelButtonText: 'ยกเลิก'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'function/action_logout.php';
+                    }
+                });
+            }
     </script>
 </body>
 </html>

@@ -3,9 +3,17 @@
     <?php
         require_once('../config/connect.php');
 
-        // Start session only if it hasn't started yet
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
+        session_start();
+
+        // // Start session only if it hasn't started yet
+        // if (session_status() == PHP_SESSION_NONE) {
+        //     session_start();
+        // }
+
+        // ตรวจสอบสิทธิ์การเข้าถึง
+        if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] != 999) {
+            header('Location: ../error404');
+            exit();
         }
 
         $admins = [];
@@ -489,10 +497,11 @@
                     cancelButtonText: 'ยกเลิก'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = '../login';
+                        window.location.href = 'function/action_logout.php';
                     }
                 });
             }
+
 
 
         </script>
