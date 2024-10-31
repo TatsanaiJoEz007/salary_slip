@@ -1,10 +1,14 @@
 RewriteEngine On
 
-# ลบ .php ออกจาก URL
+# ลบ .php ออกจาก URL และอนุญาตให้เข้าถึงได้เฉพาะชื่อไฟล์
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME}\.php -f
-RewriteRule ^(.*)$ $1.php [L,QSA]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^.]+)$ $1.php [NC,L]
 
-# ป้องกันการเข้าถึงไฟล์หรือเส้นทางที่กำหนด (ทั้งมีและไม่มี .php)
+# ป้องกันการเข้าถึงไฟล์ที่ไม่อนุญาต (ทั้งมีและไม่มี .php)
 RewriteRule ^(admin_system|file_page|upload_page)(\.php)?$ - [R=404,L]
+
+# เปิดการแสดงผลข้อผิดพลาด (สำหรับการดีบัก)
+php_flag display_errors On
+php_value error_reporting -1

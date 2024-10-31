@@ -652,6 +652,52 @@
             "install-path": "../setasign/fpdi"
         },
         {
+            "name": "setasign/fpdi-fpdf",
+            "version": "v2.3.0",
+            "version_normalized": "2.3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Setasign/FPDI-FPDF.git",
+                "reference": "f2fdc44e4d5247a3bb55ed2c2c1396ef05c02357"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Setasign/FPDI-FPDF/zipball/f2fdc44e4d5247a3bb55ed2c2c1396ef05c02357",
+                "reference": "f2fdc44e4d5247a3bb55ed2c2c1396ef05c02357",
+                "shasum": ""
+            },
+            "require": {
+                "setasign/fpdf": "^1.8.2",
+                "setasign/fpdi": "^2.3"
+            },
+            "time": "2020-02-19T12:21:53+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jan Slabon",
+                    "email": "jan.slabon@setasign.com",
+                    "homepage": "https://www.setasign.com"
+                }
+            ],
+            "description": "Kind of metadata package for dependencies of the latest versions of FPDI and FPDF.",
+            "homepage": "https://www.setasign.com/fpdi",
+            "keywords": [
+                "fpdf",
+                "fpdi",
+                "pdf"
+            ],
+            "support": {
+                "source": "https://github.com/Setasign/FPDI-FPDF/tree/v2.3.0"
+            },
+            "abandoned": true,
+            "install-path": "../setasign/fpdi-fpdf"
+        },
+        {
             "name": "smalot/pdfparser",
             "version": "v2.11.0",
             "version_normalized": "2.11.0.0",

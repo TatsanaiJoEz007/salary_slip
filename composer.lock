@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "58d35c46adf94e6e1b75f3b744065960",
+    "content-hash": "e8fbbec36eae0438f819687f1fb4aa1a",
     "packages": [
         {
             "name": "maennchen/zipstream-php",
@@ -626,6 +626,49 @@
                 }
             ],
             "time": "2024-09-02T10:17:15+00:00"
+        },
+        {
+            "name": "setasign/fpdi-fpdf",
+            "version": "v2.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Setasign/FPDI-FPDF.git",
+                "reference": "f2fdc44e4d5247a3bb55ed2c2c1396ef05c02357"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Setasign/FPDI-FPDF/zipball/f2fdc44e4d5247a3bb55ed2c2c1396ef05c02357",
+                "reference": "f2fdc44e4d5247a3bb55ed2c2c1396ef05c02357",
+                "shasum": ""
+            },
+            "require": {
+                "setasign/fpdf": "^1.8.2",
+                "setasign/fpdi": "^2.3"
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jan Slabon",
+                    "email": "jan.slabon@setasign.com",
+                    "homepage": "https://www.setasign.com"
+                }
+            ],
+            "description": "Kind of metadata package for dependencies of the latest versions of FPDI and FPDF.",
+            "homepage": "https://www.setasign.com/fpdi",
+            "keywords": [
+                "fpdf",
+                "fpdi",
+                "pdf"
+            ],
+            "support": {
+                "source": "https://github.com/Setasign/FPDI-FPDF/tree/v2.3.0"
+            },
+            "abandoned": true,
+            "time": "2020-02-19T12:21:53+00:00"
         },
         {
             "name": "smalot/pdfparser",

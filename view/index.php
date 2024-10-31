@@ -122,7 +122,7 @@
         <!-- Input and Button in Card -->
         <div class="tracking-input-group">
             <input type="text" class="form-control tracking-input" id="trackingIdInput" name="trackingId"
-                placeholder="กรอกเลขรหัสพนักเพื่อตรวจสอบสลิปเงินเดือน (Ex. P#####)" required>
+                placeholder="กรอกเลขรหัสพนักงานเพื่อตรวจสอบสลิปเงินเดือน (Ex. P#####)" required>
             <button class="track-button">ตรวจสอบ</button>
         </div>
     </div>

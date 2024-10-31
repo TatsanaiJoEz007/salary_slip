@@ -104,17 +104,17 @@
         <div class="col-lg-4 col-md-6 col-sm-8 col-xs-12"> <!-- ใช้ col-lg, col-md เพื่อปรับขนาดฟอร์ม -->
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title text-center mb-4"><?php echo $lang_login ?></h4>
+                    <h4 class="card-title text-center mb-4">เข้าสู่ระบบ</h4>
                     <a class="navbar-brand" href="../view/index">
-                        <img src="../view/assets/img/logo/logo.png" alt="Logo" class="img-fluid logo-img">
+                        <img src="assets/img/logo/logo.png" alt="Logo" class="img-fluid logo-img">
                     </a>
                     <form id="login" method="post">
                         <div class="mb-3">
-                            <label for="signin-email" class="form-label"><?php echo $lang_email ?></label>
-                            <input type="email" class="form-control" id="signin-email" name="signin-email" value="<?php echo isset($_COOKIE['username']) ? htmlspecialchars($_COOKIE['username']) : ''; ?>" required placeholder="Enter email">
+                            <label for="signin-email" class="form-label">อีเมลล์</label>
+                            <input type="email" class="form-control" id="signin-email" name="signin-email" value="" required placeholder="Enter email">
                         </div>
                         <div class="mb-3">
-                            <label for="signin-password" class="form-label"><?php echo $lang_password ?></label>
+                            <label for="signin-password" class="form-label">รหัสผ่าน</label>
                             <input type="password" class="form-control" id="signin-password" name="signin-password" required placeholder="Password">
                         </div>
 
@@ -126,7 +126,7 @@
 
                         <div class="login">
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-custom" name="login"><?php echo $lang_login ?></button>
+                                <button type="submit" class="btn btn-custom" name="login">Login</button>
                             </div>
                         </div>
                     </form>

@@ -252,7 +252,7 @@
     </style>
 </head>
 <body>
-    <div class="navbar" id="navbar">
+<div class="navbar" id="navbar">
         <button class="menu-btn" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
         </button>
@@ -305,20 +305,20 @@
         }
 
         function logout() {
-                Swal.fire({
-                    title: 'คุณต้องการออกจากระบบใช่หรือไม่?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'ออกจากระบบ',
-                    cancelButtonText: 'ยกเลิก'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = 'function/action_logout.php';
-                    }
-                });
-            }
+            Swal.fire({
+                title: 'คุณต้องการออกจากระบบใช่หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ออกจากระบบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = 'function/action_logout.php';
+                }
+            });
+        }
 
         const pdfFileInput = document.getElementById('pdfFileInput');
         const pdfFileInfo = document.getElementById('pdfFileInfo');
@@ -337,7 +337,7 @@
 
         // แสดงการแจ้งเตือนด้วย SweetAlert2 ตามสถานะ
         const status = "<?php echo $status; ?>";
-        const message = "<?php echo $message; ?>";
+        const message = <?php echo json_encode($message); ?>;
 
         if (status) {
             Swal.fire({
