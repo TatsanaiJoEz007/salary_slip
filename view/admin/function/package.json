@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "express": "^4.21.1",
+    "function": "file:",
     "pdf-parse": "^1.1.1"
   }
 }
