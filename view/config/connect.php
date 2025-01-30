@@ -7,7 +7,7 @@ ini_set('display_errors', 1);
 // ข้อมูลการเชื่อมต่อฐานข้อมูล
 $host = "localhost"; 
 $username = "root"; // แนะนำให้ใช้ผู้ใช้ที่ไม่ใช่ root ในการผลิต
-$pass = "root"; 
+$pass = ""; 
 $db = "salary_slip";
 
 // สร้างการเชื่อมต่อใหม่ด้วย MySQLi
